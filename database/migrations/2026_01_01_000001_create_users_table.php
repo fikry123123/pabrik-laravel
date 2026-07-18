@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('username')->unique();
             $table->string('password');
-            $table->enum('role', ['admin', 'editor', 'reviewer'])->default('reviewer');
+            $table->string('role')->default('admin'); // Role bisa diisi: admin, inbound, processing, atau outbound
             $table->rememberToken();
             $table->timestamps();
         });

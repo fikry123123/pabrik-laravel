@@ -9,6 +9,23 @@
     <div class="bg-white p-6 rounded-2xl border shadow-sm max-w-3xl" id="user-form-wrapper">
         <h3 id="form-user-title" class="font-bold mb-4">Tambah Akses User Baru</h3>
 
+        {{-- Alerts --}}
+        @if(session('success'))
+        <div class="mb-4 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-bold">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+        <div class="mb-4 p-3 rounded-lg bg-rose-50 text-rose-700 font-bold">{{ session('error') }}</div>
+        @endif
+        @if($errors->any())
+        <div class="mb-4 p-3 rounded-lg bg-amber-50 text-amber-700">
+            <ul class="list-disc pl-5">
+                @foreach($errors->all() as $err)
+                <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
         {{-- Form Tambah --}}
         <form method="POST" action="{{ route('users.store') }}" id="form-tambah-user" class="flex gap-4 items-end">
             @csrf

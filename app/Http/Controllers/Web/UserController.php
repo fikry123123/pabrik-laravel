@@ -23,9 +23,14 @@ class UserController extends Controller
             'role'     => 'required|in:admin,editor,reviewer',
         ]);
 
-        User::create($request->only('username', 'password', 'role'));
-
-        return back()->with('success', 'User baru berhasil ditambahkan!');
+        try {
+            User::create($request->only('username', 'password', 'role'));
+            return back()->with('success', 'User baru berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            // Log exception for debugging and show friendly error
+            logger()->error('User creation failed: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal menambahkan user: ' . $e->getMessage());
+        }
     }
 
     public function update(Request $request, User $user): RedirectResponse

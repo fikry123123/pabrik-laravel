@@ -63,11 +63,34 @@ class ProductionController extends Controller
         return back()->with('success', 'Barang berhasil diselesaikan dan dikeluarkan!');
     }
 
-    public function outbound(): View
+    public function outbound(Request $request)
     {
         $history = BarangKeluar::latest()->get()->groupBy(
             fn($item) => $item->created_at->format('Y-m-d')
         );
+
+        if ($request->query('export')) {
+            $xlsxFilename = 'barang-keluar-'.now()->format('Ymd_His').'.xlsx';
+
+            if (class_exists(\Maatwebsite\Excel\Facades\Excel::class) && class_exists(\App\Exports\BarangKeluarExport::class)) {
+                return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\BarangKeluarExport($history), $xlsxFilename);
+            }
+
+            // Fallback to HTML-based .xls export (styled) if maatwebsite/excel is not installed
+            $filename = 'Laporan_Barang_Keluar_'.now()->format('Y-m-d_His').'.xls';
+            $headers = [
+                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
+            ];
+
+            $html = view('production.export_xls', compact('history'))->render();
+            // Prepend UTF-8 BOM so Excel recognizes encoding
+            $content = "\xEF\xBB\xBF" . $html;
+
+            return response($content, 200, $headers);
+        }
 
         return view('production.outbound', compact('history'));
     }
