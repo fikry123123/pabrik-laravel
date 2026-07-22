@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+.env.example
+node_modules
+vendor
+tests
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+pabrik-laravel.zip
+README.md
+README_bawaan_laravel.md
