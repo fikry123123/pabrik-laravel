@@ -77,10 +77,11 @@
         </form>
     </div>
 
-    {{-- Tabel Users --}}
+    {{-- Data Users --}}
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm min-w-[480px]">
+
+        {{-- Desktop: tabel --}}
+        <table class="hidden md:table w-full text-left text-sm">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Username</th>
@@ -98,29 +99,62 @@
                             {{ $u->role }}
                         </span>
                     </td>
-                    <td class="p-4 text-right flex justify-end gap-2">
-                        <button onclick="editUser({{ $u->id }}, '{{ $u->username }}', '{{ $u->role }}')"
-                                class="text-blue-500 bg-blue-50 p-2 rounded-lg">
-                            <i data-lucide="edit" size="16"></i>
-                        </button>
-                        @if($u->id !== auth()->id())
-                        <form method="POST" action="{{ route('users.destroy', $u) }}"
-                              onsubmit="return confirm('Hapus akses user ini?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-rose-500 bg-rose-50 p-2 rounded-lg">
-                                <i data-lucide="trash-2" size="16"></i>
+                    <td class="p-4">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="editUser({{ $u->id }}, '{{ $u->username }}', '{{ $u->role }}')"
+                                    class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors" title="Edit">
+                                <i data-lucide="edit" size="16"></i>
                             </button>
-                        </form>
-                        @else
-                        <div class="bg-slate-100 px-3 py-2 rounded-lg">
-                            <span class="text-xs text-slate-400 font-bold">Anda Sendiri</span>
+                            @if($u->id !== auth()->id())
+                            <form method="POST" action="{{ route('users.destroy', $u) }}"
+                                  onsubmit="return confirm('Hapus akses user ini?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="text-rose-500 bg-rose-50 p-2 rounded-lg hover:bg-rose-100 transition-colors" title="Hapus">
+                                    <i data-lucide="trash-2" size="16"></i>
+                                </button>
+                            </form>
+                            @else
+                            <div class="bg-slate-100 px-3 py-2 rounded-lg">
+                                <span class="text-xs text-slate-400 font-bold">Anda Sendiri</span>
+                            </div>
+                            @endif
                         </div>
-                        @endif
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+
+        {{-- Mobile: kartu --}}
+        <div class="md:hidden divide-y">
+            @foreach($users as $u)
+            <div class="p-4 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="font-black text-slate-800 truncate">{{ $u->username }}</p>
+                    <span class="inline-block mt-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider
+                        {{ $u->role === 'admin' ? 'bg-emerald-100 text-emerald-700' : ($u->role === 'editor' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700') }}">
+                        {{ $u->role }}
+                    </span>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                    <button onclick="editUser({{ $u->id }}, '{{ $u->username }}', '{{ $u->role }}')"
+                            class="text-blue-500 bg-blue-50 p-2.5 rounded-lg" title="Edit">
+                        <i data-lucide="edit" size="16"></i>
+                    </button>
+                    @if($u->id !== auth()->id())
+                    <form method="POST" action="{{ route('users.destroy', $u) }}"
+                          onsubmit="return confirm('Hapus akses user ini?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="text-rose-500 bg-rose-50 p-2.5 rounded-lg" title="Hapus">
+                            <i data-lucide="trash-2" size="16"></i>
+                        </button>
+                    </form>
+                    @else
+                    <span class="bg-slate-100 px-3 py-2 rounded-lg text-xs text-slate-400 font-bold whitespace-nowrap">Anda</span>
+                    @endif
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
 </div>

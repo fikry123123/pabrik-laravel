@@ -24,8 +24,8 @@
             <i data-lucide="calendar" class="text-emerald-600"></i>
             {{ \Carbon\Carbon::parse($date)->translatedFormat('d F Y') }}
         </div>
-        <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm min-w-[520px]">
+        {{-- Desktop: tabel --}}
+        <table class="hidden md:table w-full text-left text-sm">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4 w-1/4">Waktu</th>
@@ -47,13 +47,11 @@
                     @if($canManage)
                     <td class="p-4">
                         <div class="flex justify-end gap-2">
-                            {{-- Edit --}}
                             <button type="button"
                                     onclick="editBarangKeluar({{ $h->id }}, '{{ addslashes($h->nama_barang) }}', {{ $h->qty }})"
                                     class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors" title="Edit">
                                 <i data-lucide="edit" size="16"></i>
                             </button>
-                            {{-- Hapus --}}
                             <form method="POST" action="{{ route('production.outbound.destroy', $h) }}"
                                   onsubmit="return confirm('Hapus data barang keluar ini? Tindakan ini tidak bisa dibatalkan.')">
                                 @csrf @method('DELETE')
@@ -68,6 +66,38 @@
                 @endforeach
             </tbody>
         </table>
+
+        {{-- Mobile: kartu --}}
+        <div class="md:hidden divide-y">
+            @foreach($items as $h)
+            <div class="p-4 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="font-black text-slate-700 truncate">{{ strtoupper($h->nama_barang) }}</p>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ $h->created_at->format('H:i') }} WIB</p>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <span class="font-black text-emerald-600 whitespace-nowrap">
+                        {{ $h->qty }} <span class="text-[10px] text-slate-400 uppercase tracking-widest">Unit</span>
+                    </span>
+                    @if($canManage)
+                    <div class="flex gap-2">
+                        <button type="button"
+                                onclick="editBarangKeluar({{ $h->id }}, '{{ addslashes($h->nama_barang) }}', {{ $h->qty }})"
+                                class="text-blue-500 bg-blue-50 p-2.5 rounded-lg" title="Edit">
+                            <i data-lucide="edit" size="16"></i>
+                        </button>
+                        <form method="POST" action="{{ route('production.outbound.destroy', $h) }}"
+                              onsubmit="return confirm('Hapus data barang keluar ini? Tindakan ini tidak bisa dibatalkan.')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="text-rose-500 bg-rose-50 p-2.5 rounded-lg" title="Hapus">
+                                <i data-lucide="trash-2" size="16"></i>
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
     @empty

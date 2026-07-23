@@ -60,14 +60,16 @@
             <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-md">View Only</span>
             @endif
         </div>
-        <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm min-w-[560px]">
+        @php($canManage = !auth()->user()->isReviewer())
+
+        {{-- Desktop: tabel --}}
+        <table class="hidden md:table w-full text-left text-sm">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Barang</th>
                     <th class="p-4">Qty</th>
                     <th class="p-4">Tanggal Mulai</th>
-                    @if(!auth()->user()->isReviewer())
+                    @if($canManage)
                     <th class="p-4 text-right">Aksi</th>
                     @endif
                 </tr>
@@ -78,7 +80,7 @@
                     <td class="p-4 font-bold text-slate-700">{{ $w->nama_produk }}</td>
                     <td class="p-4 font-black">{{ $w->qty }}</td>
                     <td class="p-4 text-xs text-slate-400">{{ $w->created_at->format('d M Y, H:i') }}</td>
-                    @if(!auth()->user()->isReviewer())
+                    @if($canManage)
                     <td class="p-4 text-right">
                         <form method="POST" action="{{ route('production.complete', $w) }}">
                             @csrf
@@ -98,6 +100,35 @@
                 @endforelse
             </tbody>
         </table>
+
+        {{-- Mobile: kartu --}}
+        <div class="md:hidden divide-y">
+            @forelse($wip_list as $w)
+            <div class="p-4 space-y-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="font-black text-slate-800 truncate">{{ $w->nama_produk }}</p>
+                        <p class="text-xs text-slate-400 mt-0.5">{{ $w->created_at->format('d M Y, H:i') }}</p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Qty</p>
+                        <p class="text-xl font-black text-slate-800 leading-none">{{ $w->qty }}</p>
+                    </div>
+                </div>
+                @if($canManage)
+                <form method="POST" action="{{ route('production.complete', $w) }}">
+                    @csrf
+                    <button class="w-full bg-emerald-500 text-white font-bold px-4 py-3 rounded-lg text-xs hover:bg-emerald-600 shadow-md">
+                        SELESAIKAN & KELUARKAN
+                    </button>
+                </form>
+                @endif
+            </div>
+            @empty
+            <div class="p-10 text-center text-slate-400 font-bold">
+                Belum ada barang yang sedang diproses.
+            </div>
+            @endforelse
         </div>
     </div>
 </div>

@@ -40,15 +40,17 @@
     </div>
     @endif
 
-    {{-- Tabel --}}
+    {{-- Data Bahan Baku --}}
+    @php($canManage = !auth()->user()->isReviewer())
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm min-w-[480px]">
+
+        {{-- Desktop: tabel --}}
+        <table class="hidden md:table w-full text-left text-sm">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Nama</th>
                     <th class="p-4">Stok</th>
-                    @if(!auth()->user()->isReviewer())
+                    @if($canManage)
                     <th class="p-4 text-right">Aksi</th>
                     @endif
                 </tr>
@@ -58,22 +60,21 @@
                 <tr class="border-b">
                     <td class="p-4 font-bold text-slate-700">{{ $b->nama }}</td>
                     <td class="p-4">{{ $b->stok }} <span class="text-xs text-slate-400">{{ $b->satuan }}</span></td>
-                    @if(!auth()->user()->isReviewer())
-                    <td class="p-4 text-right flex justify-end gap-2">
-                        {{-- Edit --}}
-                        <button
-                            onclick="setEditBahan({{ $b->id }}, '{{ addslashes($b->nama) }}', {{ $b->stok }}, '{{ $b->satuan }}')"
-                            class="text-blue-500 bg-blue-50 p-2 rounded-lg">
-                            <i data-lucide="edit" size="16"></i>
-                        </button>
-                        {{-- Hapus --}}
-                        <form method="POST" action="{{ route('inventory.destroy', $b) }}"
-                              onsubmit="return confirm('Hapus? Resep yang pakai bahan ini akan ikut terhapus!')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-rose-500 bg-rose-50 p-2 rounded-lg">
-                                <i data-lucide="trash-2" size="16"></i>
+                    @if($canManage)
+                    <td class="p-4">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="setEditBahan({{ $b->id }}, '{{ addslashes($b->nama) }}', {{ $b->stok }}, '{{ $b->satuan }}')"
+                                    class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors" title="Edit">
+                                <i data-lucide="edit" size="16"></i>
                             </button>
-                        </form>
+                            <form method="POST" action="{{ route('inventory.destroy', $b) }}"
+                                  onsubmit="return confirm('Hapus? Resep yang pakai bahan ini akan ikut terhapus!')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="text-rose-500 bg-rose-50 p-2 rounded-lg hover:bg-rose-100 transition-colors" title="Hapus">
+                                    <i data-lucide="trash-2" size="16"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                     @endif
                 </tr>
@@ -84,6 +85,37 @@
                 @endforelse
             </tbody>
         </table>
+
+        {{-- Mobile: kartu --}}
+        <div class="md:hidden divide-y">
+            @forelse($materials as $b)
+            <div class="p-4 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="font-black text-slate-800 truncate">{{ $b->nama }}</p>
+                    <p class="text-sm text-slate-500 mt-0.5">
+                        Stok: <span class="font-bold text-slate-700">{{ $b->stok }}</span>
+                        <span class="text-xs text-slate-400">{{ $b->satuan }}</span>
+                    </p>
+                </div>
+                @if($canManage)
+                <div class="flex gap-2 flex-shrink-0">
+                    <button onclick="setEditBahan({{ $b->id }}, '{{ addslashes($b->nama) }}', {{ $b->stok }}, '{{ $b->satuan }}')"
+                            class="text-blue-500 bg-blue-50 p-2.5 rounded-lg" title="Edit">
+                        <i data-lucide="edit" size="16"></i>
+                    </button>
+                    <form method="POST" action="{{ route('inventory.destroy', $b) }}"
+                          onsubmit="return confirm('Hapus? Resep yang pakai bahan ini akan ikut terhapus!')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="text-rose-500 bg-rose-50 p-2.5 rounded-lg" title="Hapus">
+                            <i data-lucide="trash-2" size="16"></i>
+                        </button>
+                    </form>
+                </div>
+                @endif
+            </div>
+            @empty
+            <div class="p-10 text-center text-slate-400 font-bold">Belum ada bahan baku.</div>
+            @endforelse
         </div>
     </div>
 </div>

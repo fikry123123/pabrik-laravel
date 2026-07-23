@@ -56,43 +56,49 @@
     @endif
 
     {{-- Daftar Produk --}}
+    @php($canManage = !auth()->user()->isReviewer())
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
         <div class="p-4 bg-slate-50 border-b font-bold text-slate-700">Daftar Master Produk & BOM</div>
-        <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm min-w-[520px]">
+
+        {{-- Desktop: tabel --}}
+        <table class="hidden md:table w-full text-left text-sm">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Nama Produk</th>
                     <th class="p-4">Komposisi Bahan</th>
-                    @if(!auth()->user()->isReviewer())
+                    @if($canManage)
                     <th class="p-4 text-right">Aksi</th>
                     @endif
                 </tr>
             </thead>
             <tbody>
                 @forelse($products as $p)
-                <tr class="border-b">
+                <tr class="border-b align-top">
                     <td class="p-4 font-bold text-slate-700">{{ $p->nama_produk }}</td>
-                    <td class="p-4 flex flex-wrap gap-2">
-                        @foreach($p->reseps as $r)
-                        <span class="bg-slate-100 px-2 py-1 rounded text-[11px]">
-                            {{ $r->bahanMentah->nama }} ({{ $r->qty_butuh }})
-                        </span>
-                        @endforeach
+                    <td class="p-4">
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($p->reseps as $r)
+                            <span class="bg-slate-100 px-2 py-1 rounded text-[11px]">
+                                {{ $r->bahanMentah->nama }} ({{ $r->qty_butuh }})
+                            </span>
+                            @endforeach
+                        </div>
                     </td>
-                    @if(!auth()->user()->isReviewer())
-                    <td class="p-4 text-right flex justify-end gap-2">
-                        <button onclick="editResep({{ $p->id }}, '{{ addslashes($p->nama_produk) }}')"
-                                class="text-blue-500 bg-blue-50 p-2 rounded-lg">
-                            <i data-lucide="edit" size="16"></i>
-                        </button>
-                        <form method="POST" action="{{ route('recipes.destroy', $p) }}"
-                              onsubmit="return confirm('Hapus master produk dan resep ini?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-rose-500 bg-rose-50 p-2 rounded-lg">
-                                <i data-lucide="trash-2" size="16"></i>
+                    @if($canManage)
+                    <td class="p-4">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="editResep({{ $p->id }}, '{{ addslashes($p->nama_produk) }}')"
+                                    class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors" title="Edit">
+                                <i data-lucide="edit" size="16"></i>
                             </button>
-                        </form>
+                            <form method="POST" action="{{ route('recipes.destroy', $p) }}"
+                                  onsubmit="return confirm('Hapus master produk dan resep ini?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="text-rose-500 bg-rose-50 p-2 rounded-lg hover:bg-rose-100 transition-colors" title="Hapus">
+                                    <i data-lucide="trash-2" size="16"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                     @endif
                 </tr>
@@ -103,6 +109,45 @@
                 @endforelse
             </tbody>
         </table>
+
+        {{-- Mobile: kartu --}}
+        <div class="md:hidden divide-y">
+            @forelse($products as $p)
+            <div class="p-4 space-y-3">
+                <div class="flex items-start justify-between gap-3">
+                    <p class="font-black text-slate-800">{{ $p->nama_produk }}</p>
+                    @if($canManage)
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button onclick="editResep({{ $p->id }}, '{{ addslashes($p->nama_produk) }}')"
+                                class="text-blue-500 bg-blue-50 p-2 rounded-lg" title="Edit">
+                            <i data-lucide="edit" size="16"></i>
+                        </button>
+                        <form method="POST" action="{{ route('recipes.destroy', $p) }}"
+                              onsubmit="return confirm('Hapus master produk dan resep ini?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="text-rose-500 bg-rose-50 p-2 rounded-lg" title="Hapus">
+                                <i data-lucide="trash-2" size="16"></i>
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Komposisi Bahan</p>
+                    <div class="flex flex-wrap gap-2">
+                        @forelse($p->reseps as $r)
+                        <span class="bg-slate-100 px-2 py-1 rounded text-[11px] font-medium">
+                            {{ $r->bahanMentah->nama }} ({{ $r->qty_butuh }})
+                        </span>
+                        @empty
+                        <span class="text-xs text-slate-400 italic">Belum ada komponen</span>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-10 text-center text-slate-400 font-bold">Belum ada produk terdaftar.</div>
+            @endforelse
         </div>
     </div>
 </div>
@@ -115,16 +160,16 @@
     const routeUpdate  = "{{ url('recipes') }}"; // /{id} ditambah via JS
 
     const bomRowHtml = () => `
-        <div class="flex gap-3 mt-2 items-center resep-row">
-            <select name="id_bahan[]" class="flex-1 p-3 border bg-slate-50 rounded-xl" required>
+        <div class="flex gap-2 mt-2 items-center resep-row">
+            <select name="id_bahan[]" class="flex-1 min-w-0 p-3 border bg-slate-50 rounded-xl" required>
                 <option value="">-- Pilih Bahan Baku --</option>
                 @foreach($materials as $b)
                 <option value="{{ $b->id }}">{{ $b->nama }} ({{ $b->satuan }})</option>
                 @endforeach
             </select>
-            <input type="number" step="0.1" name="qty_butuh[]" class="w-24 sm:w-32 p-3 border bg-slate-50 rounded-xl" placeholder="Qty" required>
+            <input type="number" step="0.1" name="qty_butuh[]" class="w-20 sm:w-28 flex-shrink-0 p-3 border bg-slate-50 rounded-xl" placeholder="Qty" required>
             <button type="button" onclick="this.closest('.resep-row').remove()"
-                    class="w-[50px] h-[50px] bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-100 transition-colors">
+                    class="w-12 h-12 flex-shrink-0 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-100 transition-colors">
                 <i data-lucide="trash-2" size="20"></i>
             </button>
         </div>`;

@@ -33,8 +33,8 @@
             <i data-lucide="bar-chart-2" class="text-blue-500"></i>
             Proyeksi Kapasitas Produksi
         </h3>
-        <div class="overflow-x-auto -mx-5 md:mx-0 px-5 md:px-0">
-        <table class="w-full text-left text-sm min-w-[520px]">
+        {{-- Desktop: tabel --}}
+        <table class="hidden md:table w-full text-left text-sm">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Nama Produk</th>
@@ -62,6 +62,29 @@
                 @endforelse
             </tbody>
         </table>
+
+        {{-- Mobile: kartu --}}
+        <div class="md:hidden space-y-3">
+            @forelse($proyeksi as $p)
+            <div class="border rounded-2xl p-4 space-y-2">
+                <div class="flex items-center justify-between gap-3">
+                    <p class="font-black text-slate-800">{{ $p['nama_produk'] }}</p>
+                    <span class="font-black text-sm whitespace-nowrap {{ $p['kapasitas'] > 0 ? 'text-emerald-500' : 'text-rose-500' }}">
+                        {{ $p['kapasitas'] }} Unit
+                    </span>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Kebutuhan Resep</p>
+                    <p class="text-xs text-slate-500">
+                        {{ collect($p['bom'])->map(fn($b) => "{$b['qty_butuh']} {$b['satuan']} {$b['nama_bahan']}")->join(' + ') ?: '—' }}
+                    </p>
+                </div>
+            </div>
+            @empty
+            <div class="p-10 text-center text-slate-400 font-bold">
+                Belum ada produk terdaftar.
+            </div>
+            @endforelse
         </div>
     </div>
 
