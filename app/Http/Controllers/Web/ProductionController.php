@@ -94,4 +94,23 @@ class ProductionController extends Controller
 
         return view('production.outbound', compact('history'));
     }
+
+    public function updateOutbound(Request $request, BarangKeluar $barangKeluar): RedirectResponse
+    {
+        $data = $request->validate([
+            'nama_barang' => 'required|string|max:255',
+            'qty'         => 'required|integer|min:1',
+        ]);
+
+        $barangKeluar->update($data);
+
+        return back()->with('success', 'Data barang keluar berhasil diperbarui!');
+    }
+
+    public function destroyOutbound(BarangKeluar $barangKeluar): RedirectResponse
+    {
+        $barangKeluar->delete();
+
+        return back()->with('success', 'Data barang keluar berhasil dihapus!');
+    }
 }

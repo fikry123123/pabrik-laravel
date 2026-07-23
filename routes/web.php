@@ -60,6 +60,10 @@ Route::middleware('auth')->group(function () {
         Route::middleware('role:admin,editor')->group(function () {
             Route::post('/start',        [ProductionController::class, 'start'])->name('start');
             Route::post('/complete/{wip}',[ProductionController::class, 'complete'])->name('complete');
+
+            // Kelola riwayat barang keluar
+            Route::put('/outbound/{barangKeluar}',    [ProductionController::class, 'updateOutbound'])->name('outbound.update');
+            Route::delete('/outbound/{barangKeluar}', [ProductionController::class, 'destroyOutbound'])->name('outbound.destroy');
         });
     });
 
