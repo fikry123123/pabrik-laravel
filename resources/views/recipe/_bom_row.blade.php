@@ -6,6 +6,6 @@
         @endforeach
     </select>
     <input type="number" step="0.1" name="qty_butuh[]"
-           class="w-32 p-3 border bg-slate-50 rounded-xl" placeholder="Butuh Qty" required>
+           class="w-24 sm:w-32 p-3 border bg-slate-50 rounded-xl" placeholder="Qty" required>
     <div class="w-[50px]"></div>
 </div>

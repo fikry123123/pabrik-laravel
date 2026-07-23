@@ -7,7 +7,7 @@
 
     {{-- Form Tambah / Edit --}}
     @if(!auth()->user()->isReviewer())
-    <div class="bg-white p-8 rounded-3xl shadow-sm border max-w-2xl" id="recipe-form-wrapper">
+    <div class="bg-white p-5 md:p-8 rounded-3xl shadow-sm border max-w-2xl" id="recipe-form-wrapper">
         <h3 id="form-resep-title" class="text-lg font-black mb-6">Buat Master Barang & Resep Baru</h3>
 
         <form method="POST" id="form-resep" action="{{ route('recipes.store') }}" class="space-y-6">
@@ -58,7 +58,8 @@
     {{-- Daftar Produk --}}
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
         <div class="p-4 bg-slate-50 border-b font-bold text-slate-700">Daftar Master Produk & BOM</div>
-        <table class="w-full text-left text-sm">
+        <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm min-w-[520px]">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Nama Produk</th>
@@ -102,6 +103,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 @endsection
@@ -120,7 +122,7 @@
                 <option value="{{ $b->id }}">{{ $b->nama }} ({{ $b->satuan }})</option>
                 @endforeach
             </select>
-            <input type="number" step="0.1" name="qty_butuh[]" class="w-32 p-3 border bg-slate-50 rounded-xl" placeholder="Butuh Qty" required>
+            <input type="number" step="0.1" name="qty_butuh[]" class="w-24 sm:w-32 p-3 border bg-slate-50 rounded-xl" placeholder="Qty" required>
             <button type="button" onclick="this.closest('.resep-row').remove()"
                     class="w-[50px] h-[50px] bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-100 transition-colors">
                 <i data-lucide="trash-2" size="20"></i>

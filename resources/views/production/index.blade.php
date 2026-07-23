@@ -7,7 +7,7 @@
 
     {{-- Form Produksi Baru --}}
     @if(!auth()->user()->isReviewer())
-    <div class="bg-white p-8 rounded-3xl shadow-sm border max-w-2xl">
+    <div class="bg-white p-5 md:p-8 rounded-3xl shadow-sm border max-w-2xl">
         <h3 class="text-lg font-black mb-6 text-amber-500 flex items-center gap-2">
             <i data-lucide="zap"></i> Eksekusi Produksi Baru
         </h3>
@@ -60,7 +60,8 @@
             <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-md">View Only</span>
             @endif
         </div>
-        <table class="w-full text-left text-sm">
+        <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm min-w-[560px]">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Barang</th>
@@ -97,6 +98,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 @endsection

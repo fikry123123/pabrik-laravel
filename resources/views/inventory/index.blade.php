@@ -11,25 +11,27 @@
         <h3 class="font-bold mb-4" id="form-title">Tambah Bahan Baku Baru</h3>
 
         {{-- Form Tambah --}}
-        <form method="POST" action="{{ route('inventory.store') }}" id="form-tambah-bahan" class="flex gap-4">
+        <form method="POST" action="{{ route('inventory.store') }}" id="form-tambah-bahan" class="flex flex-col sm:flex-row gap-3 sm:gap-4">
             @csrf
             <input type="text"   name="nama"   placeholder="Nama Bahan"        class="flex-1 p-3 border rounded-xl bg-slate-50" required>
-            <input type="number" name="stok"   placeholder="Stok" step="0.1"   class="w-32 p-3 border rounded-xl bg-slate-50" required>
-            <input type="text"   name="satuan" placeholder="Satuan (Pcs/Kg)"   class="w-36 p-3 border rounded-xl bg-slate-50" required>
-            <button type="submit" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold">Simpan</button>
+            <input type="number" name="stok"   placeholder="Stok" step="0.1"   class="w-full sm:w-32 p-3 border rounded-xl bg-slate-50" required>
+            <input type="text"   name="satuan" placeholder="Satuan (Pcs/Kg)"   class="w-full sm:w-36 p-3 border rounded-xl bg-slate-50" required>
+            <button type="submit" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold whitespace-nowrap">Simpan</button>
         </form>
 
         {{-- Form Edit (hidden by default) --}}
-        <form id="form-edit-bahan" method="POST" action="" class="flex gap-4" style="display: none;">
+        <form id="form-edit-bahan" method="POST" action="" class="flex flex-col sm:flex-row gap-3 sm:gap-4" style="display: none;">
             @csrf
             @method('PUT')
             <input type="text"   name="nama"   placeholder="Nama Bahan"      class="flex-1 p-3 border rounded-xl bg-slate-50" required>
-            <input type="number" name="stok"   placeholder="Stok" step="0.1" class="w-32 p-3 border rounded-xl bg-slate-50" required>
-            <input type="text"   name="satuan" placeholder="Satuan"           class="w-36 p-3 border rounded-xl bg-slate-50" required>
-            <button type="submit" class="bg-amber-500 text-white px-6 py-3 rounded-xl font-bold">Update</button>
-            <button type="button" onclick="resetEditBahan()" class="bg-slate-200 px-4 rounded-xl">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
+            <input type="number" name="stok"   placeholder="Stok" step="0.1" class="w-full sm:w-32 p-3 border rounded-xl bg-slate-50" required>
+            <input type="text"   name="satuan" placeholder="Satuan"           class="w-full sm:w-36 p-3 border rounded-xl bg-slate-50" required>
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 sm:flex-none bg-amber-500 text-white px-6 py-3 rounded-xl font-bold">Update</button>
+                <button type="button" onclick="resetEditBahan()" class="bg-slate-200 px-4 rounded-xl">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
         </form>
     </div>
     @else
@@ -40,7 +42,8 @@
 
     {{-- Tabel --}}
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
-        <table class="w-full text-left text-sm">
+        <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm min-w-[480px]">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Nama</th>
@@ -81,6 +84,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 @endsection

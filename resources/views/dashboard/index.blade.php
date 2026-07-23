@@ -28,12 +28,13 @@
     </div>
 
     {{-- Proyeksi Kapasitas --}}
-    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-5 md:p-8">
         <h3 class="font-black text-slate-800 mb-6 flex items-center gap-2">
             <i data-lucide="bar-chart-2" class="text-blue-500"></i>
             Proyeksi Kapasitas Produksi
         </h3>
-        <table class="w-full text-left text-sm">
+        <div class="overflow-x-auto -mx-5 md:mx-0 px-5 md:px-0">
+        <table class="w-full text-left text-sm min-w-[520px]">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Nama Produk</th>
@@ -61,6 +62,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
 </div>

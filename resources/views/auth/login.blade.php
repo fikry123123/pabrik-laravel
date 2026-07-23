@@ -2,13 +2,14 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login – PabrikPro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-100 h-screen flex items-center justify-center font-sans">
+<body class="bg-slate-100 min-h-screen flex items-center justify-center font-sans p-4">
 
-    <div class="bg-white p-10 rounded-3xl shadow-xl w-96 border border-slate-200">
+    <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-xl w-full max-w-sm border border-slate-200">
         <div class="text-center mb-8">
             <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <i data-lucide="factory" size="32"></i>

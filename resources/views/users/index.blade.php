@@ -27,7 +27,7 @@
         @endif
 
         {{-- Form Tambah --}}
-        <form method="POST" action="{{ route('users.store') }}" id="form-tambah-user" class="flex gap-4 items-end">
+        <form method="POST" action="{{ route('users.store') }}" id="form-tambah-user" class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
             @csrf
             <div class="flex-1">
                 <label class="text-xs font-bold text-slate-400 uppercase">Username</label>
@@ -37,7 +37,7 @@
                 <label class="text-xs font-bold text-slate-400 uppercase">Password</label>
                 <input type="password" name="password" class="w-full p-3 border rounded-xl bg-slate-50 mt-1" required>
             </div>
-            <div class="w-40">
+            <div class="w-full sm:w-40">
                 <label class="text-xs font-bold text-slate-400 uppercase">Role</label>
                 <select name="role" class="w-full p-3 border rounded-xl bg-slate-50 mt-1" required>
                     <option value="editor">Editor</option>
@@ -45,11 +45,11 @@
                     <option value="admin">Admin</option>
                 </select>
             </div>
-            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold h-[50px]">Simpan</button>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold h-[50px] whitespace-nowrap">Simpan</button>
         </form>
 
         {{-- Form Edit (hidden by default) --}}
-        <form method="POST" id="form-edit-user" action="" class="flex gap-4 items-end hidden">
+        <form method="POST" id="form-edit-user" action="" class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end hidden">
             @csrf @method('PUT')
             <div class="flex-1">
                 <label class="text-xs font-bold text-slate-400 uppercase">Username</label>
@@ -60,7 +60,7 @@
                 <input type="password" name="password" id="edit-password" placeholder="Kosongkan jika tidak diubah"
                        class="w-full p-3 border rounded-xl bg-slate-50 mt-1">
             </div>
-            <div class="w-40">
+            <div class="w-full sm:w-40">
                 <label class="text-xs font-bold text-slate-400 uppercase">Role</label>
                 <select name="role" id="edit-role" class="w-full p-3 border rounded-xl bg-slate-50 mt-1" required>
                     <option value="editor">Editor</option>
@@ -68,16 +68,19 @@
                     <option value="admin">Admin</option>
                 </select>
             </div>
-            <button type="submit" class="bg-amber-500 text-white px-6 py-3 rounded-xl font-bold h-[50px]">Update</button>
-            <button type="button" onclick="resetUserForm()" class="bg-slate-200 px-4 rounded-xl h-[50px]">
-                <i data-lucide="x"></i>
-            </button>
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 sm:flex-none bg-amber-500 text-white px-6 py-3 rounded-xl font-bold h-[50px]">Update</button>
+                <button type="button" onclick="resetUserForm()" class="bg-slate-200 px-4 rounded-xl h-[50px]">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
         </form>
     </div>
 
     {{-- Tabel Users --}}
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
-        <table class="w-full text-left text-sm">
+        <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm min-w-[480px]">
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4">Username</th>
@@ -118,6 +121,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 @endsection
