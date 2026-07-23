@@ -2,7 +2,7 @@
 @section('title', 'Barang Keluar – PabrikPro')
 @section('page_title', 'Riwayat Barang Keluar')
 
-@php($canManage = !auth()->user()->isReviewer())
+@php $canManage = ! auth()->user()->isReviewer(); @endphp
 
 @section('content')
 <div class="space-y-6">

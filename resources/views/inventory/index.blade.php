@@ -41,7 +41,7 @@
     @endif
 
     {{-- Data Bahan Baku --}}
-    @php($canManage = !auth()->user()->isReviewer())
+    @php $canManage = ! auth()->user()->isReviewer(); @endphp
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
 
         {{-- Desktop: tabel --}}

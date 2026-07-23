@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Route;
 // ─── Auth ────────────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     Route::get('/',      [AuthController::class, 'showLogin'])->name('login');
+    // GET /login juga menampilkan halaman login supaya reload URL /login
+    // tidak menghasilkan error 405 (Method Not Allowed).
+    Route::get('/login', [AuthController::class, 'showLogin']);
     Route::post('/login',[AuthController::class, 'login'])->name('login.post');
 });
 

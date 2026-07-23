@@ -56,7 +56,7 @@
     @endif
 
     {{-- Daftar Produk --}}
-    @php($canManage = !auth()->user()->isReviewer())
+    @php $canManage = ! auth()->user()->isReviewer(); @endphp
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
         <div class="p-4 bg-slate-50 border-b font-bold text-slate-700">Daftar Master Produk & BOM</div>
 

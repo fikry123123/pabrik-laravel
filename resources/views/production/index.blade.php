@@ -60,7 +60,7 @@
             <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-md">View Only</span>
             @endif
         </div>
-        @php($canManage = !auth()->user()->isReviewer())
+        @php $canManage = ! auth()->user()->isReviewer(); @endphp
 
         {{-- Desktop: tabel --}}
         <table class="hidden md:table w-full text-left text-sm">
