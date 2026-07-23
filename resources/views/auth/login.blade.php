@@ -20,6 +20,12 @@
             <p class="text-sm text-slate-500 font-medium mt-1">Silakan login untuk melanjutkan</p>
         </div>
 
+        @if(session('error'))
+            <div class="bg-amber-100 text-amber-700 p-3 rounded-xl mb-4 text-sm font-bold text-center">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @if($errors->any())
             <div class="bg-rose-100 text-rose-600 p-3 rounded-xl mb-4 text-sm font-bold text-center">
                 {{ $errors->first() }}
