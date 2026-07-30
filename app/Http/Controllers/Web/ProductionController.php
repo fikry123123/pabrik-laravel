@@ -69,11 +69,14 @@ class ProductionController extends Controller
             fn($item) => $item->created_at->format('Y-m-d')
         );
 
+        $summary = $this->buildExportSummary($history);
+        $chartSvg = $this->buildChartSvg($summary);
+
         if ($request->query('export')) {
             $xlsxFilename = 'barang-keluar-'.now()->format('Ymd_His').'.xlsx';
 
-            if (class_exists(\Maatwebsite\Excel\Facades\Excel::class) && class_exists(\App\Exports\BarangKeluarExport::class)) {
-                return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\BarangKeluarExport($history), $xlsxFilename);
+            if (class_exists(\Maatwebsite\Excel\Facades\Excel::class) && class_exists(\App\Exports\BarangKeluarExcelExport::class)) {
+                return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\BarangKeluarExcelExport($history, $summary), $xlsxFilename);
             }
 
             // Fallback to HTML-based .xls export (styled) if maatwebsite/excel is not installed
@@ -85,7 +88,7 @@ class ProductionController extends Controller
                 'Expires' => '0',
             ];
 
-            $html = view('production.export_xls', compact('history'))->render();
+            $html = view('production.export_xls', compact('history', 'summary', 'chartSvg'))->render();
             // Prepend UTF-8 BOM so Excel recognizes encoding
             $content = "\xEF\xBB\xBF" . $html;
 
@@ -93,6 +96,101 @@ class ProductionController extends Controller
         }
 
         return view('production.outbound', compact('history'));
+    }
+
+    protected function buildChartSvg(array $summary): string
+    {
+        $barangKeluar = max(0, (int) ($summary['total_barang_keluar'] ?? 0));
+        $unitProduksi = max(0, (int) ($summary['total_unit_produksi'] ?? 0));
+        $maxValue = max(1, $barangKeluar, $unitProduksi);
+        $bar1 = max(20, (int) round(($barangKeluar / $maxValue) * 220));
+        $bar2 = max(20, (int) round(($unitProduksi / $maxValue) * 220));
+        $label1X = $bar1 + 130;
+        $label2X = $bar2 + 130;
+
+        return <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="320" viewBox="0 0 760 320">
+  <rect x="0" y="0" width="760" height="320" fill="#ffffff"/>
+  <rect x="40" y="60" width="680" height="200" fill="#f8fafc" stroke="#dbe2ea" rx="8"/>
+  <text x="60" y="92" font-family="Arial" font-size="18" font-weight="bold" fill="#111827">Grafik Ringkasan Produksi</text>
+  <line x1="90" y1="220" x2="650" y2="220" stroke="#94a3b8" stroke-width="2"/>
+  <rect x="120" y="160" width="{$bar1}" height="36" rx="6" fill="#2563eb"/>
+  <rect x="120" y="110" width="{$bar2}" height="36" rx="6" fill="#16a34a"/>
+  <text x="120" y="102" font-family="Arial" font-size="13" font-weight="bold" fill="#111827">Unit Produksi</text>
+  <text x="120" y="152" font-family="Arial" font-size="13" font-weight="bold" fill="#111827">Barang Keluar</text>
+  <text x="{$label1X}" y="183" font-family="Arial" font-size="12" fill="#111827">{$barangKeluar}</text>
+  <text x="{$label2X}" y="133" font-family="Arial" font-size="12" fill="#111827">{$unitProduksi}</text>
+</svg>
+SVG;
+    }
+
+    protected function buildExportSummary($history): array
+    {
+        $items = collect($history)->flatten();
+        $produkUsage = [];
+        $bahanUsage = [];
+        $monthlyUsage = [];
+
+        foreach ($items as $item) {
+            $namaProduk = trim((string) $item->nama_barang);
+            $qty = (int) $item->qty;
+            $produkUsage[$namaProduk] = ($produkUsage[$namaProduk] ?? 0) + $qty;
+
+            $monthKey = $item->created_at->format('Y-m');
+            $monthlyUsage[$monthKey][] = [
+                'nama_produk' => $namaProduk,
+                'qty' => $qty,
+            ];
+
+            $produk = MasterProduk::where('nama_produk', $namaProduk)->with('reseps.bahanMentah')->first();
+            if ($produk) {
+                foreach ($produk->reseps as $resep) {
+                    if (! $resep->bahanMentah) {
+                        continue;
+                    }
+
+                    $bahanUsage[$resep->bahanMentah->nama] = ($bahanUsage[$resep->bahanMentah->nama] ?? 0) + ($resep->qty_butuh * $qty);
+                }
+            }
+        }
+
+        $topProduk = collect($produkUsage)->sortDesc()->take(5);
+        $topBahan = collect($bahanUsage)->sortDesc()->take(5);
+        $perluDitambahkan = [];
+
+        foreach (BahanMentah::where('stok', '<=', 10)->get() as $bahan) {
+            $perluDitambahkan[] = [
+                'nama' => $bahan->nama,
+                'stok' => (float) $bahan->stok,
+                'satuan' => $bahan->satuan,
+            ];
+        }
+
+        $rekapPerBulan = [];
+        foreach ($monthlyUsage as $month => $rows) {
+            $rekapPerBulan[$month] = collect($rows)
+                ->groupBy('nama_produk')
+                ->map(function ($group, $produkNama) {
+                    return [
+                        'nama_produk' => $produkNama,
+                        'qty' => $group->sum('qty'),
+                    ];
+                })
+                ->sortByDesc('qty')
+                ->values()
+                ->all();
+        }
+
+        krsort($rekapPerBulan);
+
+        return [
+            'total_barang_keluar' => $items->count(),
+            'total_unit_produksi' => (int) $items->sum('qty'),
+            'produk_terbanyak' => $topProduk->keys()->first() ?? '-',
+            'bahan_terbanyak' => $topBahan->keys()->first() ?? '-',
+            'perlu_ditambahkan' => $perluDitambahkan,
+            'rekap_per_bulan' => $rekapPerBulan,
+        ];
     }
 
     public function updateOutbound(Request $request, BarangKeluar $barangKeluar): RedirectResponse
