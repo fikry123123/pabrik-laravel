@@ -39,7 +39,7 @@
             <tbody>
                 @foreach($items as $h)
                 <tr class="border-b hover:bg-slate-50 transition-colors">
-                    <td class="p-4 text-slate-500 font-medium whitespace-nowrap">{{ $h->created_at->format('H:i') }} WIB</td>
+                    <td class="p-4 text-slate-500 font-medium whitespace-nowrap">{{ $h->created_at->format('H:i:s') }} WIB</td>
                     <td class="p-4 font-black text-slate-700">{{ strtoupper($h->nama_barang) }}</td>
                     <td class="p-4 font-black text-emerald-600 whitespace-nowrap">
                         {{ $h->qty }} <span class="text-[10px] text-slate-400 uppercase tracking-widest ml-1">Unit</span>
@@ -48,7 +48,7 @@
                     <td class="p-4">
                         <div class="flex justify-end gap-2">
                             <button type="button"
-                                    onclick="editBarangKeluar({{ $h->id }}, '{{ addslashes($h->nama_barang) }}', {{ $h->qty }})"
+                                    onclick="editBarangKeluar({{ $h->id }}, '{{ addslashes($h->nama_barang) }}', {{ $h->qty }}, '{{ $h->created_at->format('Y-m-d\\TH:i:s') }}')"
                                     class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors" title="Edit">
                                 <i data-lucide="edit" size="16"></i>
                             </button>
@@ -82,7 +82,7 @@
                     @if($canManage)
                     <div class="flex gap-2">
                         <button type="button"
-                                onclick="editBarangKeluar({{ $h->id }}, '{{ addslashes($h->nama_barang) }}', {{ $h->qty }})"
+                                onclick="editBarangKeluar({{ $h->id }}, '{{ addslashes($h->nama_barang) }}', {{ $h->qty }}, '{{ $h->created_at->format('Y-m-d\\TH:i:s') }}')"
                                 class="text-blue-500 bg-blue-50 p-2.5 rounded-lg" title="Edit">
                             <i data-lucide="edit" size="16"></i>
                         </button>
@@ -137,6 +137,16 @@
                 <input type="number" name="qty" id="bk-qty" min="1"
                        class="w-full p-3 border bg-slate-50 rounded-xl mt-1 font-black text-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" required>
             </div>
+            <div>
+                <label class="text-xs font-bold text-slate-400 uppercase">Waktu Barang Keluar</label>
+                <div class="flex gap-2 items-center">
+                    <input type="datetime-local" name="created_at" id="bk-created-at" step="1"
+                           class="flex-1 p-3 border bg-slate-50 rounded-xl mt-1 text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" required>
+                    <button type="button" onclick="setNowBkCreatedAt()" title="Set ke sekarang"
+                            class="ml-2 bg-slate-200 px-3 py-2 rounded-xl font-bold hover:bg-slate-300 transition-colors">Sekarang</button>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Gunakan field untuk memilih tanggal dan waktu lengkap (termasuk detik).</p>
+            </div>
             <div class="flex gap-3 pt-2">
                 <button type="submit" class="flex-1 bg-blue-600 text-white font-black py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all">
                     SIMPAN PERUBAHAN
@@ -158,15 +168,25 @@
     const outboundBaseUrl = "{{ url('production/outbound') }}";
     const modalBK = document.getElementById('modal-edit-bk');
 
-    function editBarangKeluar(id, nama, qty) {
+    const bkCreatedAt = document.getElementById('bk-created-at');
+
+    function editBarangKeluar(id, nama, qty, createdAt) {
         document.getElementById('form-edit-bk').action = `${outboundBaseUrl}/${id}`;
         document.getElementById('bk-nama').value = nama;
         document.getElementById('bk-qty').value  = qty;
+        bkCreatedAt.value = createdAt;
 
         modalBK.classList.remove('hidden');
         modalBK.classList.add('flex');
         document.body.classList.add('overflow-hidden');
         lucide.createIcons();
+    }
+
+    function setNowBkCreatedAt() {
+        const d = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        if (bkCreatedAt) bkCreatedAt.value = value;
     }
 
     function closeEditBarangKeluar() {

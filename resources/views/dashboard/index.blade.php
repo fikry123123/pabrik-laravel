@@ -57,26 +57,13 @@
                     </div>
                     <span class="text-xs font-semibold text-slate-500">Unit</span>
                 </div>
-                @php
-                    $monthlyMax = $monthlyProduction->max('total_qty') ?: 1;
-                @endphp
-                <div class="space-y-4">
-                    @foreach($monthlyProduction as $month)
-                        @php $barWidth = min(100, ($month->total_qty / $monthlyMax) * 100); @endphp
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-slate-600">{{ $month->month }}</span>
-                                <span class="font-bold text-slate-800">{{ $month->total_qty }}</span>
-                            </div>
-                            <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
-                                <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-sky-400" style="width: {{ $barWidth }}%"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                    @if($monthlyProduction->isEmpty())
-                        <div class="text-slate-400">Belum ada produksi bulanan.</div>
-                    @endif
-                </div>
+                @if($monthlyProduction->isNotEmpty())
+                    <div style="height:220px">
+                        <canvas id="monthlyChartCanvas"></canvas>
+                    </div>
+                @else
+                    <div class="text-slate-400">Belum ada produksi bulanan.</div>
+                @endif
             </div>
 
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
@@ -87,24 +74,13 @@
                     </div>
                     <span class="text-xs font-semibold text-slate-500">Unit</span>
                 </div>
-                @php $topMax = $topProducts->max('total_qty') ?: 1; @endphp
-                <div class="space-y-4">
-                    @foreach($topProducts as $product)
-                        @php $barWidth = min(100, ($product->total_qty / $topMax) * 100); @endphp
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-slate-600">{{ $product->nama_barang }}</span>
-                                <span class="font-bold text-slate-800">{{ $product->total_qty }}</span>
-                            </div>
-                            <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
-                                <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-lime-400" style="width: {{ $barWidth }}%"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                    @if($topProducts->isEmpty())
-                        <div class="text-slate-400">Belum ada data produksi.</div>
-                    @endif
-                </div>
+                @if($topProducts->isNotEmpty())
+                    <div style="height:220px">
+                        <canvas id="topProductsChartCanvas"></canvas>
+                    </div>
+                @else
+                    <div class="text-slate-400">Belum ada data produksi.</div>
+                @endif
             </div>
 
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
@@ -237,3 +213,61 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    try {
+        // Monthly production
+        const months = {!! json_encode($monthlyProduction->pluck('month')->all()) !!};
+        const monthValues = {!! json_encode($monthlyProduction->pluck('total_qty')->all()) !!};
+        const mCtx = document.getElementById('monthlyChartCanvas');
+        if (mCtx && months.length) {
+            new Chart(mCtx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Produksi (Unit)',
+                        data: monthValues,
+                        backgroundColor: 'rgba(59,130,246,0.9)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Top products (horizontal)
+        const topLabels = {!! json_encode($topProducts->pluck('nama_barang')->all()) !!};
+        const topValues = {!! json_encode($topProducts->pluck('total_qty')->all()) !!};
+        const tCtx = document.getElementById('topProductsChartCanvas');
+        if (tCtx && topLabels.length) {
+            new Chart(tCtx, {
+                type: 'bar',
+                data: {
+                    labels: topLabels,
+                    datasets: [{
+                        label: 'Terjual (Unit)',
+                        data: topValues,
+                        backgroundColor: 'rgba(16,185,129,0.9)'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Chart init error:', e);
+    }
+});
+</script>
+@endpush

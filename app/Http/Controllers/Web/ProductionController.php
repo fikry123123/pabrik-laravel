@@ -6,8 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BarangKeluar;
 use App\Models\BahanMentah;
 use App\Models\MasterProduk;
-use App\Models\ProduksiWip;
-use Illuminate\Http\RedirectResponse;
+use App\Models\ProduksiWip;use Carbon\Carbon;use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -198,9 +197,14 @@ SVG;
         $data = $request->validate([
             'nama_barang' => 'required|string|max:255',
             'qty'         => 'required|integer|min:1',
+            'created_at'  => 'required|date',
         ]);
 
-        $barangKeluar->update($data);
+        $barangKeluar->update([
+            'nama_barang' => $data['nama_barang'],
+            'qty'         => $data['qty'],
+            'created_at'  => Carbon::parse($data['created_at']),
+        ]);
 
         return back()->with('success', 'Data barang keluar berhasil diperbarui!');
     }
