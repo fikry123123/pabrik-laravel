@@ -25,7 +25,10 @@ class InventoryController extends Controller
             'satuan' => 'required|string|max:20',
         ]);
 
-        BahanMentah::create($request->only('nama', 'stok', 'satuan'));
+        BahanMentah::create(array_merge(
+            $request->only('nama', 'stok', 'satuan'),
+            ['created_by' => $request->user()->id]
+        ));
 
         return back()->with('success', 'Bahan baku berhasil ditambahkan!');
     }
@@ -38,7 +41,10 @@ class InventoryController extends Controller
             'satuan' => 'required|string|max:20',
         ]);
 
-        $inventory->update($request->only('nama', 'stok', 'satuan'));
+        $inventory->update(array_merge(
+            $request->only('nama', 'stok', 'satuan'),
+            ['updated_by' => $request->user()->id]
+        ));
 
         return back()->with('success', 'Data bahan baku diperbarui!');
     }

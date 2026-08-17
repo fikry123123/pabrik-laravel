@@ -2,11 +2,18 @@
 @section('title', 'Resep Produk – PabrikPro')
 @section('page_title', 'Resep Produk')
 
+@php
+    use App\Helpers\PermissionHelper;
+    $canCreate = PermissionHelper::canCreate('resep');
+    $canUpdate = PermissionHelper::canUpdate('resep');
+    $canDelete = PermissionHelper::canDelete('resep');
+@endphp
+
 @section('content')
 <div class="space-y-8">
 
     {{-- Form Tambah / Edit --}}
-    @if(!auth()->user()->isReviewer())
+    @if($canCreate || $canUpdate)
     <div class="bg-white p-5 md:p-8 rounded-3xl shadow-sm border max-w-2xl" id="recipe-form-wrapper">
         <h3 id="form-resep-title" class="text-lg font-black mb-6">Buat Master Barang & Resep Baru</h3>
 
@@ -50,13 +57,12 @@
         </form>
     </div>
     @else
-    <div class="bg-amber-50 text-amber-600 p-4 rounded-xl font-bold border border-amber-200">
-        Mode Reviewer: Anda tidak diizinkan menambahkan resep baru.
+    <div class="bg-amber-50 text-amber-600 p-4 rounded-xl font-bold border border-amber-200 flex items-center gap-2">
+        <i data-lucide="eye"></i> Mode Reviewer: Anda tidak diizinkan menambahkan resep baru.
     </div>
     @endif
 
     {{-- Daftar Produk --}}
-    @php $canManage = ! auth()->user()->isReviewer(); @endphp
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
         <div class="p-4 bg-slate-50 border-b font-bold text-slate-700">Daftar Master Produk & BOM</div>
 
@@ -66,7 +72,7 @@
                 <tr>
                     <th class="p-4">Nama Produk</th>
                     <th class="p-4">Komposisi Bahan</th>
-                    @if($canManage)
+                    @if($canUpdate || $canDelete)
                     <th class="p-4 text-right">Aksi</th>
                     @endif
                 </tr>
@@ -84,13 +90,16 @@
                             @endforeach
                         </div>
                     </td>
-                    @if($canManage)
+                    @if($canUpdate || $canDelete)
                     <td class="p-4">
                         <div class="flex justify-end gap-2">
+                            @if($canUpdate)
                             <button onclick="editResep({{ $p->id }}, '{{ addslashes($p->nama_produk) }}')"
                                     class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors" title="Edit">
                                 <i data-lucide="edit" size="16"></i>
                             </button>
+                            @endif
+                            @if($canDelete)
                             <form method="POST" action="{{ route('recipes.destroy', $p) }}"
                                   onsubmit="return confirm('Hapus master produk dan resep ini?')">
                                 @csrf @method('DELETE')
@@ -98,6 +107,7 @@
                                     <i data-lucide="trash-2" size="16"></i>
                                 </button>
                             </form>
+                            @endif
                         </div>
                     </td>
                     @endif
@@ -116,12 +126,15 @@
             <div class="p-4 space-y-3">
                 <div class="flex items-start justify-between gap-3">
                     <p class="font-black text-slate-800">{{ $p->nama_produk }}</p>
-                    @if($canManage)
+                    @if($canUpdate || $canDelete)
                     <div class="flex gap-2 flex-shrink-0">
+                        @if($canUpdate)
                         <button onclick="editResep({{ $p->id }}, '{{ addslashes($p->nama_produk) }}')"
                                 class="text-blue-500 bg-blue-50 p-2 rounded-lg" title="Edit">
                             <i data-lucide="edit" size="16"></i>
                         </button>
+                        @endif
+                        @if($canDelete)
                         <form method="POST" action="{{ route('recipes.destroy', $p) }}"
                               onsubmit="return confirm('Hapus master produk dan resep ini?')">
                             @csrf @method('DELETE')
@@ -129,6 +142,7 @@
                                 <i data-lucide="trash-2" size="16"></i>
                             </button>
                         </form>
+                        @endif
                     </div>
                     @endif
                 </div>
@@ -141,13 +155,13 @@
                         </span>
                         @empty
                         <span class="text-xs text-slate-400 italic">Belum ada komponen</span>
-                        @endforelse
+                        @endempty
                     </div>
                 </div>
             </div>
             @empty
             <div class="p-10 text-center text-slate-400 font-bold">Belum ada produk terdaftar.</div>
-            @endforelse
+            @endempty
         </div>
     </div>
 </div>

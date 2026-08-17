@@ -37,22 +37,18 @@ Route::middleware('auth')->group(function () {
     Route::prefix('inventory')->name('inventory.')->group(function () {
         Route::get('/', [InventoryController::class, 'index'])->name('index');
 
-        Route::middleware('role:admin,editor')->group(function () {
-            Route::post('/',                          [InventoryController::class, 'store'])->name('store');
-            Route::put('/{inventory}',                [InventoryController::class, 'update'])->name('update');
-            Route::delete('/{inventory}',             [InventoryController::class, 'destroy'])->name('destroy');
-        });
+        Route::post('/')->middleware('feature:bahan_baku,can_create')->uses([InventoryController::class, 'store'])->name('store');
+        Route::put('/{inventory}')->middleware('feature:bahan_baku,can_update')->uses([InventoryController::class, 'update'])->name('update');
+        Route::delete('/{inventory}')->middleware('feature:bahan_baku,can_delete')->uses([InventoryController::class, 'destroy'])->name('destroy');
     });
 
     // Resep / BOM (admin & editor)
     Route::prefix('recipes')->name('recipes.')->group(function () {
         Route::get('/', [RecipeController::class, 'index'])->name('index');
 
-        Route::middleware('role:admin,editor')->group(function () {
-            Route::post('/',             [RecipeController::class, 'store'])->name('store');
-            Route::put('/{recipe}',      [RecipeController::class, 'update'])->name('update');
-            Route::delete('/{recipe}',   [RecipeController::class, 'destroy'])->name('destroy');
-        });
+        Route::post('/')->middleware('feature:resep,can_create')->uses([RecipeController::class, 'store'])->name('store');
+        Route::put('/{recipe}')->middleware('feature:resep,can_update')->uses([RecipeController::class, 'update'])->name('update');
+        Route::delete('/{recipe}')->middleware('feature:resep,can_delete')->uses([RecipeController::class, 'destroy'])->name('destroy');
     });
 
     // Produksi
@@ -60,14 +56,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/',             [ProductionController::class, 'index'])->name('index');
         Route::get('/outbound',     [ProductionController::class, 'outbound'])->name('outbound');
 
-        Route::middleware('role:admin,editor')->group(function () {
-            Route::post('/start',        [ProductionController::class, 'start'])->name('start');
-            Route::post('/complete/{wip}',[ProductionController::class, 'complete'])->name('complete');
-
-            // Kelola riwayat barang keluar
-            Route::put('/outbound/{barangKeluar}',    [ProductionController::class, 'updateOutbound'])->name('outbound.update');
-            Route::delete('/outbound/{barangKeluar}', [ProductionController::class, 'destroyOutbound'])->name('outbound.destroy');
-        });
+        Route::post('/start')->middleware('feature:produksi,can_create')->uses([ProductionController::class, 'start'])->name('start');
+        Route::post('/complete/{wip}')->middleware('feature:produksi,can_update')->uses([ProductionController::class, 'complete'])->name('complete');
+        Route::put('/outbound/{barangKeluar}')->middleware('feature:barang_keluar,can_update')->uses([ProductionController::class, 'updateOutbound'])->name('outbound.update');
+        Route::delete('/outbound/{barangKeluar}')->middleware('feature:barang_keluar,can_delete')->uses([ProductionController::class, 'destroyOutbound'])->name('outbound.destroy');
     });
 
     // Users (admin only)
@@ -77,5 +69,8 @@ Route::middleware('auth')->group(function () {
             Route::post('/',         [UserController::class, 'store'])->name('store');
             Route::put('/{user}',    [UserController::class, 'update'])->name('update');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+
+            // Permission Management
+            Route::put('/permissions/{user}', [UserController::class, 'updateUserPermissions'])->name('permissions.update');
         });
 });

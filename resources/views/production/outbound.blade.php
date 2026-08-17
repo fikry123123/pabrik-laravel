@@ -2,7 +2,11 @@
 @section('title', 'Barang Keluar – PabrikPro')
 @section('page_title', 'Riwayat Barang Keluar')
 
-@php $canManage = ! auth()->user()->isReviewer(); @endphp
+@php
+    use App\Helpers\PermissionHelper;
+    $canUpdate = PermissionHelper::canUpdate('barang_keluar');
+    $canDelete = PermissionHelper::canDelete('barang_keluar');
+@endphp
 
 @section('content')
 <div class="space-y-6">
@@ -29,9 +33,9 @@
             <thead class="bg-slate-50 border-b">
                 <tr>
                     <th class="p-4 w-1/4">Waktu</th>
-                    <th class="p-4 {{ $canManage ? 'w-2/5' : 'w-1/2' }}">Nama Barang</th>
+                    <th class="p-4 {{ ($canUpdate || $canDelete) ? 'w-2/5' : 'w-1/2' }}">Nama Barang</th>
                     <th class="p-4 w-1/4">Qty</th>
-                    @if($canManage)
+                    @if($canUpdate || $canDelete)
                     <th class="p-4 text-right">Aksi</th>
                     @endif
                 </tr>
@@ -44,14 +48,17 @@
                     <td class="p-4 font-black text-emerald-600 whitespace-nowrap">
                         {{ $h->qty }} <span class="text-[10px] text-slate-400 uppercase tracking-widest ml-1">Unit</span>
                     </td>
-                    @if($canManage)
+                    @if($canUpdate || $canDelete)
                     <td class="p-4">
                         <div class="flex justify-end gap-2">
+                            @if($canUpdate)
                             <button type="button"
                                     onclick="editBarangKeluar({{ $h->id }}, '{{ addslashes($h->nama_barang) }}', {{ $h->qty }}, '{{ $h->created_at->format('Y-m-d\\TH:i:s') }}')"
                                     class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors" title="Edit">
                                 <i data-lucide="edit" size="16"></i>
                             </button>
+                            @endif
+                            @if($canDelete)
                             <form method="POST" action="{{ route('production.outbound.destroy', $h) }}"
                                   onsubmit="return confirm('Hapus data barang keluar ini? Tindakan ini tidak bisa dibatalkan.')">
                                 @csrf @method('DELETE')
@@ -59,6 +66,7 @@
                                     <i data-lucide="trash-2" size="16"></i>
                                 </button>
                             </form>
+                            @endif
                         </div>
                     </td>
                     @endif
@@ -79,13 +87,16 @@
                     <span class="font-black text-emerald-600 whitespace-nowrap">
                         {{ $h->qty }} <span class="text-[10px] text-slate-400 uppercase tracking-widest">Unit</span>
                     </span>
-                    @if($canManage)
+                    @if($canUpdate || $canDelete)
                     <div class="flex gap-2">
+                        @if($canUpdate)
                         <button type="button"
                                 onclick="editBarangKeluar({{ $h->id }}, '{{ addslashes($h->nama_barang) }}', {{ $h->qty }}, '{{ $h->created_at->format('Y-m-d\\TH:i:s') }}')"
                                 class="text-blue-500 bg-blue-50 p-2.5 rounded-lg" title="Edit">
                             <i data-lucide="edit" size="16"></i>
                         </button>
+                        @endif
+                        @if($canDelete)
                         <form method="POST" action="{{ route('production.outbound.destroy', $h) }}"
                               onsubmit="return confirm('Hapus data barang keluar ini? Tindakan ini tidak bisa dibatalkan.')">
                             @csrf @method('DELETE')
@@ -93,6 +104,7 @@
                                 <i data-lucide="trash-2" size="16"></i>
                             </button>
                         </form>
+                        @endif
                     </div>
                     @endif
                 </div>
@@ -107,8 +119,7 @@
     @endforelse
 
 </div>
-
-@if($canManage)
+@if($canUpdate)
 {{-- ─── Modal Edit Barang Keluar ──────────────────────────────────────────── --}}
 <div id="modal-edit-bk"
      class="fixed inset-0 z-50 hidden items-center justify-center p-4">
@@ -162,7 +173,7 @@
 
 @endsection
 
-@if($canManage)
+@if($canUpdate)
 @push('scripts')
 <script>
     const outboundBaseUrl = "{{ url('production/outbound') }}";

@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'feature' => \App\Http\Middleware\CheckFeaturePermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

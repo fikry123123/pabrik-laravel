@@ -2,11 +2,18 @@
 @section('title', 'Proses Produksi – PabrikPro')
 @section('page_title', 'Proses Produksi')
 
+@php
+    use App\Helpers\PermissionHelper;
+    $canCreate = PermissionHelper::canCreate('produksi');
+    $canUpdate = PermissionHelper::canUpdate('produksi');
+    $canDelete = PermissionHelper::canDelete('produksi');
+@endphp
+
 @section('content')
 <div class="space-y-6">
 
     {{-- Form Produksi Baru --}}
-    @if(!auth()->user()->isReviewer())
+    @if($canCreate)
     <div class="bg-white p-5 md:p-8 rounded-3xl shadow-sm border max-w-2xl">
         <h3 class="text-lg font-black mb-6 text-amber-500 flex items-center gap-2">
             <i data-lucide="zap"></i> Eksekusi Produksi Baru
@@ -50,17 +57,20 @@
             </button>
         </form>
     </div>
+    @else
+    <div class="bg-amber-50 text-amber-600 p-4 rounded-xl font-bold border border-amber-200 flex items-center gap-2">
+        <i data-lucide="eye"></i> Mode Reviewer: Anda hanya dapat melihat data.
+    </div>
     @endif
 
     {{-- Tabel WIP --}}
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
         <div class="p-4 bg-slate-50 border-b font-bold text-slate-700 flex justify-between items-center">
             Daftar Barang Dalam Proses (WIP)
-            @if(auth()->user()->isReviewer())
+            @if(!$canUpdate && !$canDelete)
             <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-md">View Only</span>
             @endif
         </div>
-        @php $canManage = ! auth()->user()->isReviewer(); @endphp
 
         {{-- Desktop: tabel --}}
         <table class="hidden md:table w-full text-left text-sm">
@@ -69,7 +79,7 @@
                     <th class="p-4">Barang</th>
                     <th class="p-4">Qty</th>
                     <th class="p-4">Tanggal Mulai</th>
-                    @if($canManage)
+                    @if($canUpdate || $canDelete)
                     <th class="p-4 text-right">Aksi</th>
                     @endif
                 </tr>
@@ -80,7 +90,7 @@
                     <td class="p-4 font-bold text-slate-700">{{ $w->nama_produk }}</td>
                     <td class="p-4 font-black">{{ $w->qty }}</td>
                     <td class="p-4 text-xs text-slate-400">{{ $w->created_at->format('d M Y, H:i') }}</td>
-                    @if($canManage)
+                    @if($canUpdate || $canDelete)
                     <td class="p-4 text-right">
                         <form method="POST" action="{{ route('production.complete', $w) }}">
                             @csrf
@@ -115,7 +125,7 @@
                         <p class="text-xl font-black text-slate-800 leading-none">{{ $w->qty }}</p>
                     </div>
                 </div>
-                @if($canManage)
+                @if($canUpdate || $canDelete)
                 <form method="POST" action="{{ route('production.complete', $w) }}">
                     @csrf
                     <button class="w-full bg-emerald-500 text-white font-bold px-4 py-3 rounded-lg text-xs hover:bg-emerald-600 shadow-md">

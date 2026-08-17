@@ -2,11 +2,18 @@
 @section('title', 'Data Bahan Baku – PabrikPro')
 @section('page_title', 'Data Bahan Baku')
 
+@php
+    use App\Helpers\PermissionHelper;
+    $canCreate = PermissionHelper::canCreate('bahan_baku');
+    $canUpdate = PermissionHelper::canUpdate('bahan_baku');
+    $canDelete = PermissionHelper::canDelete('bahan_baku');
+@endphp
+
 @section('content')
 <div class="space-y-6">
 
     {{-- Form Tambah / Edit --}}
-    @if(!auth()->user()->isReviewer())
+    @if($canCreate || $canUpdate)
     <div class="bg-white p-6 rounded-2xl border shadow-sm">
         <h3 class="font-bold mb-4" id="form-title">Tambah Bahan Baku Baru</h3>
 
@@ -41,7 +48,6 @@
     @endif
 
     {{-- Data Bahan Baku --}}
-    @php $canManage = ! auth()->user()->isReviewer(); @endphp
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
 
         {{-- Desktop: tabel --}}
@@ -50,23 +56,43 @@
                 <tr>
                     <th class="p-4">Nama</th>
                     <th class="p-4">Stok</th>
-                    @if($canManage)
+                    <th class="p-4">Audit Info</th>
+                    @if($canUpdate || $canDelete)
                     <th class="p-4 text-right">Aksi</th>
                     @endif
                 </tr>
             </thead>
             <tbody>
                 @forelse($materials as $b)
-                <tr class="border-b">
+                <tr class="border-b hover:bg-slate-50 transition">
                     <td class="p-4 font-bold text-slate-700">{{ $b->nama }}</td>
                     <td class="p-4">{{ $b->stok }} <span class="text-xs text-slate-400">{{ $b->satuan }}</span></td>
-                    @if($canManage)
+                    <td class="p-4 text-xs text-slate-500">
+                        @if($b->createdBy)
+                        <div class="mb-1">
+                            <span class="font-bold">Ditambahkan:</span> {{ $b->createdBy->username }}
+                            <br class="inline md:hidden">
+                            pada {{ $b->created_at->format('d/m/Y H:i') }}
+                        </div>
+                        @endif
+                        @if($b->updatedBy && $b->updated_at != $b->created_at)
+                        <div class="text-amber-600">
+                            <span class="font-bold">Diperbarui:</span> {{ $b->updatedBy->username }}
+                            <br class="inline md:hidden">
+                            pada {{ $b->updated_at->format('d/m/Y H:i') }}
+                        </div>
+                        @endif
+                    </td>
+                    @if($canUpdate || $canDelete)
                     <td class="p-4">
                         <div class="flex justify-end gap-2">
+                            @if($canUpdate)
                             <button onclick="setEditBahan({{ $b->id }}, '{{ addslashes($b->nama) }}', {{ $b->stok }}, '{{ $b->satuan }}')"
                                     class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors" title="Edit">
                                 <i data-lucide="edit" size="16"></i>
                             </button>
+                            @endif
+                            @if($canDelete)
                             <form method="POST" action="{{ route('inventory.destroy', $b) }}"
                                   onsubmit="return confirm('Hapus? Resep yang pakai bahan ini akan ikut terhapus!')">
                                 @csrf @method('DELETE')
@@ -74,13 +100,14 @@
                                     <i data-lucide="trash-2" size="16"></i>
                                 </button>
                             </form>
+                            @endif
                         </div>
                     </td>
                     @endif
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="3" class="p-10 text-center text-slate-400 font-bold">Belum ada bahan baku.</td>
+                    <td colspan="4" class="p-10 text-center text-slate-400 font-bold">Belum ada bahan baku.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -89,29 +116,49 @@
         {{-- Mobile: kartu --}}
         <div class="md:hidden divide-y">
             @forelse($materials as $b)
-            <div class="p-4 flex items-center justify-between gap-3">
-                <div class="min-w-0">
-                    <p class="font-black text-slate-800 truncate">{{ $b->nama }}</p>
-                    <p class="text-sm text-slate-500 mt-0.5">
-                        Stok: <span class="font-bold text-slate-700">{{ $b->stok }}</span>
-                        <span class="text-xs text-slate-400">{{ $b->satuan }}</span>
-                    </p>
-                </div>
-                @if($canManage)
-                <div class="flex gap-2 flex-shrink-0">
-                    <button onclick="setEditBahan({{ $b->id }}, '{{ addslashes($b->nama) }}', {{ $b->stok }}, '{{ $b->satuan }}')"
-                            class="text-blue-500 bg-blue-50 p-2.5 rounded-lg" title="Edit">
-                        <i data-lucide="edit" size="16"></i>
-                    </button>
-                    <form method="POST" action="{{ route('inventory.destroy', $b) }}"
-                          onsubmit="return confirm('Hapus? Resep yang pakai bahan ini akan ikut terhapus!')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="text-rose-500 bg-rose-50 p-2.5 rounded-lg" title="Hapus">
-                            <i data-lucide="trash-2" size="16"></i>
+            <div class="p-4">
+                <div class="flex items-start justify-between gap-3 mb-3">
+                    <div class="min-w-0 flex-1">
+                        <p class="font-black text-slate-800 truncate">{{ $b->nama }}</p>
+                        <p class="text-sm text-slate-500 mt-0.5">
+                            Stok: <span class="font-bold text-slate-700">{{ $b->stok }}</span>
+                            <span class="text-xs text-slate-400">{{ $b->satuan }}</span>
+                        </p>
+                    </div>
+                    @if($canUpdate || $canDelete)
+                    <div class="flex gap-2 flex-shrink-0">
+                        @if($canUpdate)
+                        <button onclick="setEditBahan({{ $b->id }}, '{{ addslashes($b->nama) }}', {{ $b->stok }}, '{{ $b->satuan }}')"
+                                class="text-blue-500 bg-blue-50 p-2.5 rounded-lg" title="Edit">
+                            <i data-lucide="edit" size="16"></i>
                         </button>
-                    </form>
+                        @endif
+                        @if($canDelete)
+                        <form method="POST" action="{{ route('inventory.destroy', $b) }}"
+                              onsubmit="return confirm('Hapus? Resep yang pakai bahan ini akan ikut terhapus!')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="text-rose-500 bg-rose-50 p-2.5 rounded-lg" title="Hapus">
+                                <i data-lucide="trash-2" size="16"></i>
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+                    @endif
                 </div>
-                @endif
+
+                {{-- Audit Info --}}
+                <div class="bg-slate-50 rounded-lg p-3 text-xs text-slate-600">
+                    @if($b->createdBy)
+                    <div class="mb-2">
+                        <span class="font-bold">Ditambahkan:</span> {{ $b->createdBy->username }} pada {{ $b->created_at->format('d/m/Y H:i') }}
+                    </div>
+                    @endif
+                    @if($b->updatedBy && $b->updated_at != $b->created_at)
+                    <div class="text-amber-700 font-bold">
+                        <span>Diperbarui:</span> {{ $b->updatedBy->username }} pada {{ $b->updated_at->format('d/m/Y H:i') }}
+                    </div>
+                    @endif
+                </div>
             </div>
             @empty
             <div class="p-10 text-center text-slate-400 font-bold">Belum ada bahan baku.</div>
