@@ -84,6 +84,43 @@ Setelah melakukan `db:seed`, sistem akan membuatkan beberapa user default untuk 
 
 ---
 
+## 📸 Screenshot
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="screenshots/5.jpeg" alt="Dashboard" width="420"><br>
+      <b>Dashboard</b>
+    </td>
+    <td align="center">
+      <img src="screenshots/1.jpeg" alt="Manajemen Bahan Baku" width="420"><br>
+      <b>Manajemen Bahan Baku</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="screenshots/2.jpeg" alt="Resep Produk" width="420"><br>
+      <b>Resep Produk</b>
+    </td>
+    <td align="center">
+      <img src="screenshots/4.jpeg" alt="Proses Produksi" width="420"><br>
+      <b>Proses Produksi</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="screenshots/6.jpeg" alt="Riwayat Barang Keluar" width="420"><br>
+      <b>Riwayat Barang Keluar</b>
+    </td>
+    <td align="center">
+      <img src="screenshots/3.jpeg" alt="Manajemen User" width="420"><br>
+      <b>Manajemen User</b>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 📱 Dokumentasi API (Untuk Flutter/Mobile)
 
 Base URL: `http://localhost:8000/api`
