@@ -8,7 +8,7 @@ Sistem informasi manajemen pabrik yang telah dimodernisasi dari PHP murni (Legac
 
 ## 🛠 Teknologi yang Digunakan
 - **Framework:** Laravel 12 / 13
-- **Database:** MySQL
+- **Database:** MySQL atau SQLite
 - **Authentication:** Session (Web) & Laravel Sanctum (API)
 - **Role Management:** Custom Middleware (`role:admin,editor,reviewer`)
 
@@ -24,6 +24,18 @@ npm install
 
 ### 2. Konfigurasi Environment (`.env`)
 Pastikan file `.env` sudah ada dan konfigurasinya sesuai. (Jika belum, copy dari `.env.example`).
+
+Untuk SQLite (opsi praktis untuk preview), gunakan:
+```env
+DB_CONNECTION=sqlite
+DB_DATABASE=database/database.sqlite
+```
+Buat file database jika belum ada:
+```bash
+php -r "file_exists('database/database.sqlite') || touch('database/database.sqlite');"
+```
+
+Jika ingin tetap menggunakan MySQL, gunakan:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -55,6 +67,9 @@ npm run dev
 ```
 
 Project sekarang dapat diakses melalui browser di: **http://localhost:8000**
+
+### Catatan Preview di Vercel
+SQLite dapat dipakai untuk preview, tetapi filesystem pada Vercel bersifat sementara dan dapat bersifat read-only. Perubahan data di SQLite tidak dijamin tersimpan antar-request atau antar-deployment. Untuk aplikasi yang perlu menyimpan data secara andal, gunakan database terkelola eksternal dan atur kredensialnya melalui Environment Variables Vercel.
 
 ---
 
